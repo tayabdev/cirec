@@ -1,0 +1,504 @@
+{% extends "base/base.html" %}
+
+{% block title %}Subscription Management - CIREC{% endblock %}
+
+{% block extra_css %}
+<link href="{{ url_for('static', filename='css/components/subscription.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="subscription-page">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="header-content">
+                <h1 class="page-title">
+                    <i class="fas fa-crown"></i>
+                    Subscription Management
+                </h1>
+                <p class="page-subtitle">Manage your CIREC subscription and access premium features</p>
+            </div>
+            <div class="header-actions">
+                <a href="{{ url_for('user.dashboard') }}" class="btn btn-outline">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Current Subscription Status -->
+        <div class="subscription-status-card">
+            <div class="status-header">
+                <div class="status-info">
+                    <h2 class="status-title">Current Subscription</h2>
+                    <div
+                        class="status-badge {% if current_user.subscription_status == 'active' %}active{% else %}inactive{% endif %}">
+                        {% if current_user.subscription_status == 'active' %}
+                        <i class="fas fa-check-circle"></i>
+                        Active
+                        {% else %}
+                        <i class="fas fa-exclamation-triangle"></i>
+                        {{ current_user.subscription_status|title if current_user.subscription_status else 'Inactive' }}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="status-actions">
+                    {% if current_user.subscription_status == 'active' %}
+                    <button class="btn btn-outline btn-sm" onclick="manageSubscription()">
+                        <i class="fas fa-cog"></i>
+                        Manage
+                    </button>
+                    {% else %}
+                    <button class="btn btn-primary btn-sm" onclick="upgradeSubscription()">
+                        <i class="fas fa-arrow-up"></i>
+                        Upgrade Now
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="subscription-details">
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Account Type</span>
+                        <span class="detail-value">{{ current_user.account_type|title if current_user.account_type else
+                            'Not Set' }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Status</span>
+                        <span class="detail-value">{{ current_user.subscription_status|title if
+                            current_user.subscription_status else 'Inactive' }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Start Date</span>
+                        <span class="detail-value">
+                            {% if current_user.subscription_start %}
+                            {{ current_user.subscription_start.strftime('%B %d, %Y') }}
+                            {% else %}
+                            Not Set
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Expiry Date</span>
+                        <span class="detail-value">
+                            {% if current_user.subscription_end %}
+                            {{ current_user.subscription_end.strftime('%B %d, %Y') }}
+                            {% if current_user.subscription_end > current_date %}
+                            <span class="expires-in">({{ (current_user.subscription_end - current_date).days }} days
+                                remaining)</span>
+                            {% else %}
+                            <span class="expired">(Expired)</span>
+                            {% endif %}
+                            {% else %}
+                            Not Set
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                {% if current_user.subscription_status != 'active' %}
+                <div class="upgrade-prompt">
+                    <div class="prompt-content">
+                        <h3>Unlock Premium Features</h3>
+                        <p>Upgrade your subscription to access our complete database of Russian chemical industry
+                            intelligence.</p>
+                        <ul class="benefits-list">
+                            <li><i class="fas fa-check"></i> Full access to 20,000+ articles</li>
+                            <li><i class="fas fa-check"></i> AI-powered semantic search</li>
+                            <li><i class="fas fa-check"></i> Download PDF reports</li>
+                            <li><i class="fas fa-check"></i> Advanced analytics dashboard</li>
+                            <li><i class="fas fa-check"></i> Priority customer support</li>
+                        </ul>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Subscription Plans -->
+        <div class="subscription-plans">
+            <div class="plans-header">
+                <h2>Choose Your Plan</h2>
+                <p>Select the subscription that best fits your needs</p>
+            </div>
+
+            <div class="plans-grid">
+                <!-- Basic Plan -->
+                <div class="plan-card basic">
+                    <div class="plan-header">
+                        <h3 class="plan-name">Basic Search</h3>
+                        <div class="plan-price">
+                            <span class="currency">£</span>
+                            <span class="amount">50</span>
+                            <span class="period">/3 months</span>
+                        </div>
+                    </div>
+
+                    <div class="plan-features">
+                        <ul>
+                            <li><i class="fas fa-check"></i> Search engine access</li>
+                            <li><i class="fas fa-check"></i> Article previews</li>
+                            <li><i class="fas fa-check"></i> Basic keyword search</li>
+                            <li><i class="fas fa-check"></i> Email support</li>
+                            <li class="unavailable"><i class="fas fa-times"></i> Full article access</li>
+                            <li class="unavailable"><i class="fas fa-times"></i> PDF downloads</li>
+                        </ul>
+                    </div>
+
+                    <div class="plan-actions">
+                        <button class="btn btn-outline plan-btn" data-plan="basic" onclick="selectPlan('basic')">
+                            Choose Basic
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Professional Plan -->
+                <div class="plan-card professional featured">
+                    <div class="plan-badge">Most Popular</div>
+                    <div class="plan-header">
+                        <h3 class="plan-name">Professional</h3>
+                        <div class="plan-price">
+                            <span class="currency">£</span>
+                            <span class="amount">150</span>
+                            <span class="period">/12 months</span>
+                        </div>
+                        <div class="plan-savings">Save 50%</div>
+                    </div>
+
+                    <div class="plan-features">
+                        <ul>
+                            <li><i class="fas fa-check"></i> Everything in Basic</li>
+                            <li><i class="fas fa-check"></i> Full database access</li>
+                            <li><i class="fas fa-check"></i> AI-powered search</li>
+                            <li><i class="fas fa-check"></i> PDF downloads</li>
+                            <li><i class="fas fa-check"></i> Statistical database</li>
+                            <li><i class="fas fa-check"></i> Priority support</li>
+                        </ul>
+                    </div>
+
+                    <div class="plan-actions">
+                        <button class="btn btn-primary plan-btn" data-plan="professional"
+                            onclick="selectPlan('professional')">
+                            Choose Professional
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Enterprise Plan -->
+                <div class="plan-card enterprise">
+                    <div class="plan-header">
+                        <h3 class="plan-name">Enterprise</h3>
+                        <div class="plan-price">
+                            <span class="currency">£</span>
+                            <span class="amount">500</span>
+                            <span class="period">/12 months</span>
+                        </div>
+                    </div>
+
+                    <div class="plan-features">
+                        <ul>
+                            <li><i class="fas fa-check"></i> Everything in Professional</li>
+                            <li><i class="fas fa-check"></i> Multi-user access (up to 10)</li>
+                            <li><i class="fas fa-check"></i> Custom reports</li>
+                            <li><i class="fas fa-check"></i> API access</li>
+                            <li><i class="fas fa-check"></i> Dedicated account manager</li>
+                            <li><i class="fas fa-check"></i> Phone support</li>
+                        </ul>
+                    </div>
+
+                    <div class="plan-actions">
+                        <button class="btn btn-outline plan-btn" data-plan="enterprise"
+                            onclick="selectPlan('enterprise')">
+                            Contact Sales
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Methods -->
+        <div class="payment-section" id="paymentSection" style="display: none;">
+            <div class="payment-header">
+                <h2>Payment Information</h2>
+                <p>Complete your subscription upgrade</p>
+            </div>
+
+            <div class="payment-container">
+                <div class="payment-methods">
+                    <h3>Select Payment Method</h3>
+                    <div class="payment-options">
+                        <label class="payment-option">
+                            <input type="radio" name="payment_method" value="card" checked>
+                            <div class="option-content">
+                                <i class="fas fa-credit-card"></i>
+                                <span>Credit/Debit Card</span>
+                            </div>
+                        </label>
+
+                        <label class="payment-option">
+                            <input type="radio" name="payment_method" value="paypal">
+                            <div class="option-content">
+                                <i class="fab fa-paypal"></i>
+                                <span>PayPal</span>
+                            </div>
+                        </label>
+
+                        <label class="payment-option">
+                            <input type="radio" name="payment_method" value="invoice">
+                            <div class="option-content">
+                                <i class="fas fa-file-invoice"></i>
+                                <span>Invoice (Corporate)</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="payment-form" id="cardPaymentForm">
+                    <form class="subscription-form" id="subscriptionForm">
+                        <div class="form-grid">
+                            <div class="form-group span-2">
+                                <label for="card_number" class="form-label">Card Number</label>
+                                <input type="text" id="card_number" name="card_number" class="form-input"
+                                    placeholder="1234 5678 9012 3456" maxlength="19">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="expiry_date" class="form-label">Expiry Date</label>
+                                <input type="text" id="expiry_date" name="expiry_date" class="form-input"
+                                    placeholder="MM/YY" maxlength="5">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="cvv" class="form-label">CVV</label>
+                                <input type="text" id="cvv" name="cvv" class="form-input" placeholder="123"
+                                    maxlength="4">
+                            </div>
+
+                            <div class="form-group span-2">
+                                <label for="cardholder_name" class="form-label">Cardholder Name</label>
+                                <input type="text" id="cardholder_name" name="cardholder_name" class="form-input"
+                                    placeholder="John Doe">
+                            </div>
+                        </div>
+
+                        <div class="billing-section">
+                            <h4>Billing Address</h4>
+                            <div class="form-grid">
+                                <div class="form-group span-2">
+                                    <label for="billing_address" class="form-label">Address</label>
+                                    <input type="text" id="billing_address" name="billing_address" class="form-input"
+                                        placeholder="123 Main Street">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="billing_city" class="form-label">City</label>
+                                    <input type="text" id="billing_city" name="billing_city" class="form-input"
+                                        placeholder="London">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="billing_postal" class="form-label">Postal Code</label>
+                                    <input type="text" id="billing_postal" name="billing_postal" class="form-input"
+                                        placeholder="SW1A 1AA">
+                                </div>
+
+                                <div class="form-group span-2">
+                                    <label for="billing_country" class="form-label">Country</label>
+                                    <select id="billing_country" name="billing_country" class="form-select">
+                                        <option value="GB">United Kingdom</option>
+                                        <option value="US">United States</option>
+                                        <option value="DE">Germany</option>
+                                        <option value="FR">France</option>
+                                        <option value="IT">Italy</option>
+                                        <option value="ES">Spain</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-footer">
+                            <div class="total-section">
+                                <div class="total-breakdown">
+                                    <div class="breakdown-item">
+                                        <span>Subtotal:</span>
+                                        <span id="subtotal">£0.00</span>
+                                    </div>
+                                    <div class="breakdown-item">
+                                        <span>VAT (20%):</span>
+                                        <span id="vat">£0.00</span>
+                                    </div>
+                                    <div class="breakdown-item total">
+                                        <span>Total:</span>
+                                        <span id="total">£0.00</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-lg" id="subscribeBtn">
+                                <i class="fas fa-lock"></i>
+                                Complete Subscription
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="payment-security">
+                    <div class="security-badges">
+                        <div class="security-badge">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>SSL Encrypted</span>
+                        </div>
+                        <div class="security-badge">
+                            <i class="fas fa-lock"></i>
+                            <span>Secure Payment</span>
+                        </div>
+                        <div class="security-badge">
+                            <i class="fas fa-credit-card"></i>
+                            <span>PCI Compliant</span>
+                        </div>
+                    </div>
+                    <p class="security-note">Your payment information is processed securely. We do not store credit card
+                        details.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subscription History -->
+        <div class="subscription-history">
+            <h2>Subscription History</h2>
+            <div class="history-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Plan</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ current_user.created_at.strftime('%B %d, %Y') }}</td>
+                            <td>Account Created</td>
+                            <td>Free</td>
+                            <td><span class="status-badge completed">Completed</span></td>
+                            <td>
+                                <button class="btn btn-outline btn-sm">
+                                    <i class="fas fa-eye"></i>
+                                    View
+                                </button>
+                            </td>
+                        </tr>
+                        <!-- More history items would be dynamically generated -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedPlan = null;
+    const planPrices = {
+        basic: { price: 50, period: '3 months' },
+        professional: { price: 150, period: '12 months' },
+        enterprise: { price: 500, period: '12 months' }
+    };
+
+    document.addEventListener('DOMContentLoaded', function () {
+        initSubscriptionPage();
+    });
+
+    function initSubscriptionPage() {
+        // Payment method selection
+        document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                // Handle payment method changes
+                console.log('Payment method changed:', this.value);
+            });
+        });
+
+        // Card number formatting
+        const cardInput = document.getElementById('card_number');
+        if (cardInput) {
+            cardInput.addEventListener('input', function () {
+                this.value = this.value.replace(/\s/g, '').replace(/(.{4})/g, '$1 ').trim();
+            });
+        }
+
+        // Expiry date formatting
+        const expiryInput = document.getElementById('expiry_date');
+        if (expiryInput) {
+            expiryInput.addEventListener('input', function () {
+                this.value = this.value.replace(/\D/g, '').replace(/(.{2})/, '$1/').substr(0, 5);
+            });
+        }
+
+        // Form submission
+        const subscriptionForm = document.getElementById('subscriptionForm');
+        if (subscriptionForm) {
+            subscriptionForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                processSubscription();
+            });
+        }
+    }
+
+    function selectPlan(planType) {
+        selectedPlan = planType;
+
+        // Update UI to show selected plan
+        document.querySelectorAll('.plan-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+
+        document.querySelector(`.plan-card.${planType}`).classList.add('selected');
+
+        // Show payment section
+        const paymentSection = document.getElementById('paymentSection');
+        paymentSection.style.display = 'block';
+        paymentSection.scrollIntoView({ behavior: 'smooth' });
+
+        // Update pricing
+        updatePricing(planType);
+    }
+
+    function updatePricing(planType) {
+        const plan = planPrices[planType];
+        const subtotal = plan.price;
+        const vat = Math.round(subtotal * 0.2 * 100) / 100;
+        const total = subtotal + vat;
+
+        document.getElementById('subtotal').textContent = `£${subtotal.toFixed(2)}`;
+        document.getElementById('vat').textContent = `£${vat.toFixed(2)}`;
+        document.getElementById('total').textContent = `£${total.toFixed(2)}`;
+    }
+
+    function processSubscription() {
+        const subscribeBtn = document.getElementById('subscribeBtn');
+        const originalText = subscribeBtn.innerHTML;
+
+        // Show loading state
+        subscribeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        subscribeBtn.disabled = true;
+
+        // Simulate API call
+        setTimeout(() => {
+            showNotification('Subscription activated successfully!', 'success');
+            setTimeout(() => {
+                window.location.href = '/user/dashboard';
+            }, 2000);
+        }, 3000);
+    }
+
+    function manageSubscription() {
+        showNotification('Subscription management coming soon', 'info');
+    }
+
+    function upgradeSubscription() {
+        document.querySelector('.subscription-plans').scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+{% endblock %}

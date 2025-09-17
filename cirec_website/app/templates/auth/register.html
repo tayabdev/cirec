@@ -1,0 +1,436 @@
+{% extends "base/base.html" %}
+
+{% block title %}Register - CIREC{% endblock %}
+
+{% block extra_css %}
+<link href="{{ url_for('static', filename='css/components/forms.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-wrapper register-wrapper">
+        <div class="auth-card register-card">
+            <div class="auth-header">
+                <div class="auth-icon">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <h1 class="auth-title">Create Your Account</h1>
+                <p class="auth-subtitle">Join CIREC to access premium chemical industry intelligence</p>
+            </div>
+
+            <form method="POST" class="auth-form register-form" id="registerForm">
+                <!-- Personal Information -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-user"></i>
+                        Contact Information
+                    </h3>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="first_name" class="form-label">First Name *</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-user input-icon"></i>
+                                <input type="text" id="first_name" name="first_name" class="form-input"
+                                    placeholder="Enter first name" required autocomplete="given-name">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="last_name" class="form-label">Last Name *</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-user input-icon"></i>
+                                <input type="text" id="last_name" name="last_name" class="form-input"
+                                    placeholder="Enter last name" required autocomplete="family-name">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email Address *</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-envelope input-icon"></i>
+                            <input type="email" id="email" name="email" class="form-input"
+                                placeholder="Enter your email" required autocomplete="email">
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="company" class="form-label">Company</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-building input-icon"></i>
+                                <input type="text" id="company" name="company" class="form-input"
+                                    placeholder="Enter company name" autocomplete="organization">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="telephone" class="form-label">Telephone Number</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-phone input-icon"></i>
+                                <input type="tel" id="telephone" name="telephone" class="form-input"
+                                    placeholder="Enter phone number" autocomplete="tel">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subscription Information -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-credit-card"></i>
+                        Subscription Information
+                    </h3>
+
+                    <div class="form-group">
+                        <label for="account_type" class="form-label">Select Account Type *</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-users input-icon"></i>
+                            <select id="account_type" name="account_type" class="form-select" required>
+                                <option value="">--Please Select--</option>
+                                <option value="corporate">Corporate</option>
+                                <option value="single">Single</option>
+                            </select>
+                        </div>
+                        <small class="form-help">
+                            Corporate accounts allow multiple users. Single accounts are for individual use.
+                        </small>
+                    </div>
+
+                    <!-- Subscription Options (will be populated based on account type) -->
+                    <div id="subscription-options" style="display: none;">
+                        <div class="subscription-grid">
+                            <div class="subscription-card">
+                                <h4>Monthly News</h4>
+                                <div class="form-group">
+                                    <select name="monthly_news" class="form-select">
+                                        <option value="">Select Duration</option>
+                                        <option value="1_year">1 Year</option>
+                                        <option value="2_year">2 Years</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="subscription-card">
+                                <h4>Search Engine Access</h4>
+                                <div class="form-group">
+                                    <select name="search_access" class="form-select">
+                                        <option value="">Select Duration</option>
+                                        <option value="3_months">3 Months</option>
+                                        <option value="6_months">6 Months</option>
+                                        <option value="12_months">12 Months</option>
+                                        <option value="24_months">24 Months</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="subscription-card">
+                                <h4>Statistical Database Access</h4>
+                                <div class="form-group">
+                                    <select name="database_access" class="form-select">
+                                        <option value="">Select Duration</option>
+                                        <option value="1_year">1 Year</option>
+                                        <option value="2_year">2 Years</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pricing-summary">
+                            <div class="price-display">
+                                <span class="price-label">Total Amount:</span>
+                                <span class="price-amount" id="totalAmount">£0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Login Information -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-lock"></i>
+                        Login Information
+                    </h3>
+
+                    <div class="form-group">
+                        <label for="username" class="form-label">Username *</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-user-circle input-icon"></i>
+                            <input type="text" id="username" name="username" class="form-input"
+                                placeholder="Choose a username" required autocomplete="username">
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="password" class="form-label">Password *</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-lock input-icon"></i>
+                                <input type="password" id="password" name="password" class="form-input"
+                                    placeholder="Create password" required autocomplete="new-password" minlength="8">
+                                <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                                    <i class="fas fa-eye" id="password-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirm_password" class="form-label">Confirm Password *</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-lock input-icon"></i>
+                                <input type="password" id="confirm_password" name="confirm_password" class="form-input"
+                                    placeholder="Confirm password" required autocomplete="new-password">
+                                <button type="button" class="password-toggle"
+                                    onclick="togglePassword('confirm_password')">
+                                    <i class="fas fa-eye" id="confirm_password-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="password-requirements">
+                        <p class="requirements-title">Password must contain:</p>
+                        <ul class="requirements-list">
+                            <li id="length-req"><i class="fas fa-times"></i> At least 8 characters</li>
+                            <li id="uppercase-req"><i class="fas fa-times"></i> One uppercase letter</li>
+                            <li id="lowercase-req"><i class="fas fa-times"></i> One lowercase letter</li>
+                            <li id="number-req"><i class="fas fa-times"></i> One number</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Terms and Conditions -->
+                <div class="form-section">
+                    <div class="form-group">
+                        <label class="checkbox-wrapper large-checkbox">
+                            <input type="checkbox" name="agree_terms" required>
+                            <span class="checkmark"></span>
+                            <span class="checkbox-label">
+                                I agree to the <a href="#" class="auth-link" target="_blank">Terms of Service</a>
+                                and <a href="#" class="auth-link" target="_blank">Privacy Policy</a>
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-wrapper large-checkbox">
+                            <input type="checkbox" name="newsletter" checked>
+                            <span class="checkmark"></span>
+                            <span class="checkbox-label">
+                                Subscribe to our newsletter for industry updates
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="auth-btn" data-original-text="Create Account">
+                    <i class="fas fa-user-plus"></i>
+                    Create Account
+                </button>
+            </form>
+
+            <div class="auth-divider">
+                <span>or</span>
+            </div>
+
+            <div class="auth-footer">
+                <p>Already have an account?
+                    <a href="{{ url_for('auth.login') }}" class="auth-link">
+                        Sign in here
+                    </a>
+                </p>
+            </div>
+
+            <div class="auth-help">
+                <p class="help-text">
+                    <i class="fas fa-question-circle"></i>
+                    Need help? Contact us at
+                    <a href="mailto:support@cirec.net">support@cirec.net</a>
+                    or call <a href="tel:+441202959770">+44 1202 959770</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="auth-sidebar register-sidebar">
+            <div class="sidebar-content">
+                <h2>Why Choose CIREC?</h2>
+
+                <div class="benefit-list">
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <div class="benefit-content">
+                            <h4>20,000+ Articles</h4>
+                            <p>Comprehensive database of Russian chemical industry intelligence</p>
+                        </div>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <div class="benefit-content">
+                            <h4>AI-Powered Search</h4>
+                            <p>Find exactly what you need with semantic search capabilities</p>
+                        </div>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="benefit-content">
+                            <h4>Market Intelligence</h4>
+                            <p>Real-time data and trends for informed decision making</p>
+                        </div>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="fas fa-phone-alt"></i>
+                        </div>
+                        <div class="benefit-content">
+                            <h4>Expert Support</h4>
+                            <p>Get help from our industry experts</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pricing-info">
+                    <h3>Subscription Plans</h3>
+                    <div class="plan-preview">
+                        <div class="plan">
+                            <strong>Search Access:</strong> From £50/3 months
+                        </div>
+                        <div class="plan">
+                            <strong>Full Database:</strong> From £150/year
+                        </div>
+                        <div class="plan">
+                            <strong>Corporate Plans:</strong> Custom pricing
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const registerForm = document.getElementById('registerForm');
+        const submitBtn = registerForm.querySelector('.auth-btn');
+        const accountTypeSelect = document.getElementById('account_type');
+        const subscriptionOptions = document.getElementById('subscription-options');
+        const passwordInput = document.getElementById('password');
+
+        // Show subscription options when account type is selected
+        accountTypeSelect.addEventListener('change', function () {
+            if (this.value) {
+                subscriptionOptions.style.display = 'block';
+                updatePricing();
+            } else {
+                subscriptionOptions.style.display = 'none';
+            }
+        });
+
+        // Password validation
+        passwordInput.addEventListener('input', function () {
+            validatePassword(this.value);
+        });
+
+        // Form submission
+        registerForm.addEventListener('submit', function (e) {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                showNotification('Passwords do not match', 'error');
+                return;
+            }
+
+            if (!validateForm(this)) {
+                e.preventDefault();
+                return;
+            }
+
+            // Show loading state
+            submitBtn.dataset.originalText = submitBtn.innerHTML;
+            setLoadingState(submitBtn);
+        });
+
+        // Update pricing when options change
+        document.querySelectorAll('select[name^="monthly_news"], select[name^="search_access"], select[name^="database_access"]').forEach(select => {
+            select.addEventListener('change', updatePricing);
+        });
+    });
+
+    function validatePassword(password) {
+        const requirements = {
+            'length-req': password.length >= 8,
+            'uppercase-req': /[A-Z]/.test(password),
+            'lowercase-req': /[a-z]/.test(password),
+            'number-req': /\d/.test(password)
+        };
+
+        Object.keys(requirements).forEach(req => {
+            const element = document.getElementById(req);
+            const icon = element.querySelector('i');
+
+            if (requirements[req]) {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-check');
+                element.style.color = 'var(--success-color)';
+            } else {
+                icon.classList.remove('fa-check');
+                icon.classList.add('fa-times');
+                element.style.color = 'var(--error-color)';
+            }
+        });
+    }
+
+    function updatePricing() {
+        // Basic pricing calculation
+        let total = 0;
+        const monthlyNews = document.querySelector('select[name="monthly_news"]').value;
+        const searchAccess = document.querySelector('select[name="search_access"]').value;
+        const databaseAccess = document.querySelector('select[name="database_access"]').value;
+
+        // Sample pricing (you can adjust these)
+        const prices = {
+            'monthly_news': { '1_year': 100, '2_year': 180 },
+            'search_access': { '3_months': 50, '6_months': 90, '12_months': 150, '24_months': 275 },
+            'database_access': { '1_year': 150, '2_year': 280 }
+        };
+
+        if (monthlyNews && prices.monthly_news[monthlyNews]) {
+            total += prices.monthly_news[monthlyNews];
+        }
+        if (searchAccess && prices.search_access[searchAccess]) {
+            total += prices.search_access[searchAccess];
+        }
+        if (databaseAccess && prices.database_access[databaseAccess]) {
+            total += prices.database_access[databaseAccess];
+        }
+
+        document.getElementById('totalAmount').textContent = `£${total}`;
+    }
+
+    function togglePassword(inputId) {
+        const input = document.getElementById(inputId);
+        const eye = document.getElementById(inputId + '-eye');
+
+        if (input.type === 'password') {
+            input.type = 'text';
+            eye.classList.remove('fa-eye');
+            eye.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            eye.classList.remove('fa-eye-slash');
+            eye.classList.add('fa-eye');
+        }
+    }
+</script>
+{% endblock %}

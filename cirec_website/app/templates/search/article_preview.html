@@ -1,0 +1,197 @@
+{% extends "base/base.html" %}
+
+{% block title %}{{ article.title }} - Preview - CIREC{% endblock %}
+
+{% block extra_css %}
+<link href="{{ url_for('static', filename='css/components/articles.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="article-preview-page">
+    <div class="container">
+        <div class="article-container">
+            <div class="article-content">
+                <!-- Article Header -->
+                <header class="article-header">
+                    <div class="article-breadcrumb">
+                        <a href="{{ url_for('search.search') }}">
+                            <i class="fas fa-search"></i>
+                            Back to Search
+                        </a>
+                    </div>
+
+                    <h1 class="article-title">{{ article.title }}</h1>
+
+                    <div class="article-meta">
+                        {% if article.author %}
+                        <span class="meta-item">
+                            <i class="fas fa-user"></i>
+                            {{ article.author }}
+                        </span>
+                        {% endif %}
+                        <span class="meta-item">
+                            <i class="fas fa-calendar"></i>
+                            {{ article.created_at.strftime('%B %d, %Y') }}
+                        </span>
+                        <span class="meta-item">
+                            <i class="fas fa-eye"></i>
+                            Preview Mode
+                        </span>
+                    </div>
+                </header>
+
+                <!-- Preview Content -->
+                <div class="article-body">
+                    {% if article.summary %}
+                    <div class="article-summary">
+                        <h3>Summary</h3>
+                        <p>{{ article.summary }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if article.content %}
+                    <div class="article-content-preview">
+                        <p>{{ article.content|safe }}</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Access Required Overlay -->
+                    <div class="access-required-section">
+                        <div class="access-barrier">
+                            <div class="barrier-content">
+                                <div class="barrier-icon">
+                                    <i class="fas fa-lock"></i>
+                                </div>
+                                <h3>Full Article Access Required</h3>
+                                <p>This is a preview of the article. To read the complete content, analysis, and
+                                    insights, please create an account or log in.</p>
+
+                                <div class="access-benefits">
+                                    <h4>What you'll get with full access:</h4>
+                                    <ul>
+                                        <li><i class="fas fa-check"></i> Complete article content and analysis</li>
+                                        <li><i class="fas fa-check"></i> Industry data and statistics</li>
+                                        <li><i class="fas fa-check"></i> Download PDF reports</li>
+                                        <li><i class="fas fa-check"></i> Save and bookmark articles</li>
+                                        <li><i class="fas fa-check"></i> Advanced search capabilities</li>
+                                    </ul>
+                                </div>
+
+                                <div class="barrier-actions">
+                                    {% if not current_user.is_authenticated %}
+                                    <a href="{{ url_for('auth.register') }}" class="btn btn-primary">
+                                        <i class="fas fa-user-plus"></i>
+                                        Create Free Account
+                                    </a>
+                                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline">
+                                        <i class="fas fa-sign-in-alt"></i>
+                                        Log In
+                                    </a>
+                                    {% else %}
+                                    <a href="{{ url_for('user.subscription') }}" class="btn btn-primary">
+                                        <i class="fas fa-crown"></i>
+                                        Upgrade Subscription
+                                    </a>
+                                    <a href="{{ url_for('user.dashboard') }}" class="btn btn-outline">
+                                        <i class="fas fa-dashboard"></i>
+                                        Go to Dashboard
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Article Sidebar -->
+            <aside class="article-sidebar">
+                <div class="sidebar-section">
+                    <h4>Article Information</h4>
+                    <div class="info-list">
+                        <div class="info-item">
+                            <span class="info-label">Type:</span>
+                            <span class="info-value">Industry Report</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Category:</span>
+                            <span class="info-value">Chemical Industry</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Region:</span>
+                            <span class="info-value">Russia</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Language:</span>
+                            <span class="info-value">English</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h4>Subscription Plans</h4>
+                    <div class="plan-cards">
+                        <div class="plan-card">
+                            <h5>Search Access</h5>
+                            <div class="plan-price">£50</div>
+                            <div class="plan-period">3 months</div>
+                            <ul class="plan-features">
+                                <li>Basic article access</li>
+                                <li>Search capabilities</li>
+                                <li>Email support</li>
+                            </ul>
+                        </div>
+
+                        <div class="plan-card featured">
+                            <div class="plan-badge">Popular</div>
+                            <h5>Full Database</h5>
+                            <div class="plan-price">£150</div>
+                            <div class="plan-period">12 months</div>
+                            <ul class="plan-features">
+                                <li>Complete database access</li>
+                                <li>PDF downloads</li>
+                                <li>Advanced search</li>
+                                <li>Priority support</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h4>Related Articles</h4>
+                    <div class="related-articles">
+                        <div class="related-item">
+                            <h6>Russian Polymer Market Trends</h6>
+                            <p class="related-meta">March 2024 • Market Analysis</p>
+                        </div>
+                        <div class="related-item">
+                            <h6>Chemical Production Statistics</h6>
+                            <p class="related-meta">February 2024 • Statistical Report</p>
+                        </div>
+                        <div class="related-item">
+                            <h6>Industry Investment Overview</h6>
+                            <p class="related-meta">January 2024 • Investment Report</p>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('search.search') }}" class="btn btn-outline btn-sm">
+                        <i class="fas fa-search"></i>
+                        Search More Articles
+                    </a>
+                </div>
+
+                <div class="sidebar-section">
+                    <h4>Need Help?</h4>
+                    <div class="help-info">
+                        <p>Our experts are here to help you find the right information.</p>
+                        <div class="contact-info">
+                            <p><i class="fas fa-phone"></i> +44 1202 959770</p>
+                            <p><i class="fas fa-envelope"></i> support@cirec.net</p>
+                        </div>
+                        <p class="help-hours">Monday - Friday: 9 AM - 6 PM GMT</p>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,520 @@
+{% extends "base/base.html" %}
+
+{% block title %}Search - CIREC{% endblock %}
+
+{% block extra_css %}
+<link href="{{ url_for('static', filename='css/components/search.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="search-page">
+    <div class="search-header">
+        <div class="container">
+            <div class="search-hero">
+                <h1 class="search-title">
+                    <i class="fas fa-search"></i>
+                    Chemical Industry Search
+                </h1>
+                <p class="search-subtitle">
+                    Find insights from over 20,000 articles on the Russian chemical industry
+                </p>
+            </div>
+
+            <div class="advanced-search-container">
+                <form method="GET" class="search-form advanced" id="searchForm">
+                    <div class="search-input-section">
+                        <div class="main-search">
+                            <div class="search-input-wrapper">
+                                <input type="text" name="q" class="search-input"
+                                    placeholder="Search companies, chemicals, market reports..." value="{{ query }}"
+                                    autocomplete="off">
+                                <button type="submit" class="search-submit">
+                                    <i class="fas fa-search"></i>
+                                    <span>Search</span>
+                                </button>
+                            </div>
+
+                            <div class="search-suggestions" id="searchSuggestions" style="display: none;">
+                                <!-- Dynamic suggestions will be populated here -->
+                            </div>
+                        </div>
+
+                        <div class="search-options">
+                            <div class="search-type-toggles">
+                                <label class="search-toggle">
+                                    <input type="checkbox" name="ai_search" {% if request.args.get('ai_search') !='off'
+                                        %}checked{% endif %}>
+                                    <span class="toggle-slider"></span>
+                                    <span class="toggle-label">
+                                        <i class="fas fa-brain"></i>
+                                        AI Search
+                                    </span>
+                                </label>
+
+                                <label class="search-toggle">
+                                    <input type="checkbox" name="keyword_search" {% if
+                                        request.args.get('keyword_search') !='off' %}checked{% endif %}>
+                                    <span class="toggle-slider"></span>
+                                    <span class="toggle-label">
+                                        <i class="fas fa-key"></i>
+                                        Keyword Search
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div class="search-filters">
+                                <div class="filter-group">
+                                    <select name="date_range" class="filter-select">
+                                        <option value="">All Time</option>
+                                        <option value="1_month" {% if request.args.get('date_range')=='1_month'
+                                            %}selected{% endif %}>Last Month</option>
+                                        <option value="3_months" {% if request.args.get('date_range')=='3_months'
+                                            %}selected{% endif %}>Last 3 Months</option>
+                                        <option value="6_months" {% if request.args.get('date_range')=='6_months'
+                                            %}selected{% endif %}>Last 6 Months</option>
+                                        <option value="1_year" {% if request.args.get('date_range')=='1_year'
+                                            %}selected{% endif %}>Last Year</option>
+                                    </select>
+                                </div>
+
+                                <div class="filter-group">
+                                    <select name="category" class="filter-select">
+                                        <option value="">All Categories</option>
+                                        <option value="petrochemicals" {% if
+                                            request.args.get('category')=='petrochemicals' %}selected{% endif %}>
+                                            Petrochemicals</option>
+                                        <option value="polymers" {% if request.args.get('category')=='polymers'
+                                            %}selected{% endif %}>Polymers</option>
+                                        <option value="fertilizers" {% if request.args.get('category')=='fertilizers'
+                                            %}selected{% endif %}>Fertilizers</option>
+                                        <option value="specialty_chemicals" {% if
+                                            request.args.get('category')=='specialty_chemicals' %}selected{% endif %}>
+                                            Specialty Chemicals</option>
+                                        <option value="market_analysis" {% if
+                                            request.args.get('category')=='market_analysis' %}selected{% endif %}>Market
+                                            Analysis</option>
+                                    </select>
+                                </div>
+
+                                <button type="button" class="filter-toggle" onclick="toggleAdvancedFilters()">
+                                    <i class="fas fa-sliders-h"></i>
+                                    Advanced
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="advanced-filters" id="advancedFilters" style="display: none;">
+                            <div class="advanced-grid">
+                                <div class="filter-group">
+                                    <label class="filter-label">Company Name</label>
+                                    <input type="text" name="company" class="filter-input"
+                                        placeholder="e.g., Gazprom, LUKOIL"
+                                        value="{{ request.args.get('company', '') }}">
+                                </div>
+
+                                <div class="filter-group">
+                                    <label class="filter-label">Chemical/Product</label>
+                                    <input type="text" name="product" class="filter-input"
+                                        placeholder="e.g., Ethylene, Methanol"
+                                        value="{{ request.args.get('product', '') }}">
+                                </div>
+
+                                <div class="filter-group">
+                                    <label class="filter-label">Region</label>
+                                    <select name="region" class="filter-select">
+                                        <option value="">All Regions</option>
+                                        <option value="moscow" {% if request.args.get('region')=='moscow' %}selected{%
+                                            endif %}>Moscow</option>
+                                        <option value="st_petersburg" {% if request.args.get('region')=='st_petersburg'
+                                            %}selected{% endif %}>St. Petersburg</option>
+                                        <option value="siberia" {% if request.args.get('region')=='siberia' %}selected{%
+                                            endif %}>Siberia</option>
+                                        <option value="ural" {% if request.args.get('region')=='ural' %}selected{% endif
+                                            %}>Ural</option>
+                                        <option value="far_east" {% if request.args.get('region')=='far_east'
+                                            %}selected{% endif %}>Far East</option>
+                                    </select>
+                                </div>
+
+                                <div class="filter-group">
+                                    <label class="filter-label">Document Type</label>
+                                    <select name="doc_type" class="filter-select">
+                                        <option value="">All Types</option>
+                                        <option value="report" {% if request.args.get('doc_type')=='report' %}selected{%
+                                            endif %}>Market Report</option>
+                                        <option value="news" {% if request.args.get('doc_type')=='news' %}selected{%
+                                            endif %}>News Article</option>
+                                        <option value="analysis" {% if request.args.get('doc_type')=='analysis'
+                                            %}selected{% endif %}>Analysis</option>
+                                        <option value="statistics" {% if request.args.get('doc_type')=='statistics'
+                                            %}selected{% endif %}>Statistics</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="search-results-section">
+        <div class="container">
+            {% if query %}
+            <div class="search-meta">
+                <div class="results-info">
+                    <h2 class="results-title">
+                        Search Results for "{{ query }}"
+                    </h2>
+                    {% if results %}
+                    <p class="results-count">
+                        Found {{ results|length }} results
+                        {% if request.args.get('ai_search') != 'off' %}
+                        <span class="ai-badge">
+                            <i class="fas fa-brain"></i>
+                            AI Enhanced
+                        </span>
+                        {% endif %}
+                    </p>
+                    {% endif %}
+                </div>
+
+                <div class="results-actions">
+                    <button class="action-btn" onclick="saveSearch()">
+                        <i class="fas fa-bookmark"></i>
+                        Save Search
+                    </button>
+                    <button class="action-btn" onclick="exportResults()">
+                        <i class="fas fa-download"></i>
+                        Export
+                    </button>
+                </div>
+            </div>
+
+            {% if results %}
+            <div class="search-results">
+                {% for article in results %}
+                <article class="result-item">
+                    <div class="result-content">
+                        <div class="result-header">
+                            <h3 class="result-title">
+                                <a href="{{ url_for('search.preview_article', id=article.id) }}" class="result-link">
+                                    {{ article.title }}
+                                </a>
+                            </h3>
+                            <div class="result-meta">
+                                {% if article.author %}
+                                <span class="meta-item">
+                                    <i class="fas fa-user"></i>
+                                    {{ article.author }}
+                                </span>
+                                {% endif %}
+                                <span class="meta-item">
+                                    <i class="fas fa-calendar"></i>
+                                    {{ article.created_at.strftime('%B %d, %Y') }}
+                                </span>
+                                <span class="meta-item">
+                                    <i class="fas fa-eye"></i>
+                                    {{ article.view_count }} views
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="result-preview">
+                            <p class="preview-text">
+                                {% if article.summary %}
+                                {{ article.summary[:150] }}...
+                                {% elif article.content %}
+                                {{ article.content[:150] }}...
+                                {% else %}
+                                No preview available.
+                                {% endif %}
+                            </p>
+
+                            {% if not current_user.is_authenticated %}
+                            <div class="access-overlay">
+                                <div class="access-message">
+                                    <i class="fas fa-lock"></i>
+                                    <h4>Premium Content</h4>
+                                    <p>Create an account to read the full article</p>
+                                    <div class="access-actions">
+                                        <a href="{{ url_for('auth.login') }}" class="btn btn-primary">
+                                            Login
+                                        </a>
+                                        <a href="{{ url_for('auth.register') }}" class="btn btn-outline">
+                                            Register
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% elif current_user.subscription_status != 'active' %}
+                            <div class="access-overlay">
+                                <div class="access-message">
+                                    <i class="fas fa-crown"></i>
+                                    <h4>Subscription Required</h4>
+                                    <p>Upgrade your subscription to read full articles</p>
+                                    <div class="access-actions">
+                                        <a href="{{ url_for('user.subscription') }}" class="btn btn-primary">
+                                            Upgrade Now
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="result-actions">
+                            {% if current_user.is_authenticated and current_user.subscription_status == 'active' %}
+                            <a href="{{ url_for('user.view_article', id=article.id) }}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-eye"></i>
+                                Read Full Article
+                            </a>
+                            {% endif %}
+                            <button class="btn btn-outline btn-sm" onclick="shareArticle('{{ article.id }}')">
+                                <i class="fas fa-share"></i>
+                                Share
+                            </button>
+                            <button class="btn btn-outline btn-sm" onclick="bookmarkArticle('{{ article.id }}')">
+                                <i class="fas fa-bookmark"></i>
+                                Save
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="result-sidebar">
+                        <div class="relevance-score">
+                            <div class="score-circle">
+                                <span class="score-value">{{ (range(75, 95) | random) }}%</span>
+                            </div>
+                            <span class="score-label">Relevance</span>
+                        </div>
+
+                        {% if article.source_file %}
+                        <div class="file-info">
+                            <i class="fas fa-file-pdf"></i>
+                            <span>PDF Available</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+
+            <div class="pagination-container">
+                <div class="pagination">
+                    <!-- Pagination will be implemented later -->
+                    <button class="page-btn prev" disabled>
+                        <i class="fas fa-chevron-left"></i>
+                        Previous
+                    </button>
+                    <span class="page-info">Page 1 of 1</span>
+                    <button class="page-btn next" disabled>
+                        Next
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+            {% else %}
+            <div class="no-results">
+                <div class="no-results-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3>No Results Found</h3>
+                <p>We couldn't find any articles matching your search. Try:</p>
+                <ul>
+                    <li>Using different keywords</li>
+                    <li>Checking your spelling</li>
+                    <li>Using broader search terms</li>
+                    <li>Enabling both AI and keyword search</li>
+                </ul>
+                <div class="suggestion-actions">
+                    <button class="btn btn-primary" onclick="clearSearch()">
+                        <i class="fas fa-redo"></i>
+                        Clear Search
+                    </button>
+                    <a href="{{ url_for('index') }}" class="btn btn-outline">
+                        <i class="fas fa-home"></i>
+                        Back to Home
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+            {% else %}
+            <div class="search-tips">
+                <div class="tips-container">
+                    <h2>Search Tips</h2>
+                    <div class="tips-grid">
+                        <div class="tip-card">
+                            <div class="tip-icon">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <h4>Use Specific Terms</h4>
+                            <p>Search for specific company names, chemical compounds, or market segments for better
+                                results.</p>
+                        </div>
+
+                        <div class="tip-card">
+                            <div class="tip-icon">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <h4>AI-Powered Search</h4>
+                            <p>Our AI understands context and meaning, so you can search using natural language.</p>
+                        </div>
+
+                        <div class="tip-card">
+                            <div class="tip-icon">
+                                <i class="fas fa-filter"></i>
+                            </div>
+                            <h4>Use Filters</h4>
+                            <p>Narrow down results by date, category, region, or document type for more relevant
+                                findings.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        initSearchPage();
+    });
+
+    function initSearchPage() {
+        const searchInput = document.querySelector('.search-input');
+        const searchForm = document.getElementById('searchForm');
+
+        // Search suggestions
+        if (searchInput) {
+            let searchTimeout;
+            searchInput.addEventListener('input', function () {
+                clearTimeout(searchTimeout);
+                const query = this.value.trim();
+
+                if (query.length > 2) {
+                    searchTimeout = setTimeout(() => {
+                        fetchSearchSuggestions(query);
+                    }, 300);
+                } else {
+                    hideSuggestions();
+                }
+            });
+        }
+
+        // Auto-submit form when filters change
+        document.querySelectorAll('.filter-select').forEach(select => {
+            select.addEventListener('change', function () {
+                if (searchInput.value.trim()) {
+                    searchForm.submit();
+                }
+            });
+        });
+    }
+
+    function toggleAdvancedFilters() {
+        const filters = document.getElementById('advancedFilters');
+        const toggle = document.querySelector('.filter-toggle');
+
+        if (filters.style.display === 'none' || !filters.style.display) {
+            filters.style.display = 'block';
+            toggle.classList.add('active');
+        } else {
+            filters.style.display = 'none';
+            toggle.classList.remove('active');
+        }
+    }
+
+    function fetchSearchSuggestions(query) {
+        // This would typically make an API call
+        const suggestions = [
+            'Gazprom petrochemicals',
+            'Russian polymer market',
+            'Sibur ethylene production',
+            'Lukoil refinery capacity',
+            'Russian fertilizer exports'
+        ];
+
+        showSuggestions(suggestions.filter(s =>
+            s.toLowerCase().includes(query.toLowerCase())
+        ));
+    }
+
+    function showSuggestions(suggestions) {
+        const container = document.getElementById('searchSuggestions');
+
+        if (suggestions.length > 0) {
+            container.innerHTML = suggestions.map(suggestion =>
+                `<div class="suggestion-item" onclick="selectSuggestion('${suggestion}')">
+                <i class="fas fa-search"></i>
+                ${suggestion}
+            </div>`
+            ).join('');
+            container.style.display = 'block';
+        } else {
+            hideSuggestions();
+        }
+    }
+
+    function hideSuggestions() {
+        const container = document.getElementById('searchSuggestions');
+        container.style.display = 'none';
+    }
+
+    function selectSuggestion(suggestion) {
+        const searchInput = document.querySelector('.search-input');
+        searchInput.value = suggestion;
+        hideSuggestions();
+        document.getElementById('searchForm').submit();
+    }
+
+    function saveSearch() {
+        showNotification('Search saved to your account', 'success');
+    }
+
+    function exportResults() {
+        showNotification('Exporting search results...', 'info');
+    }
+
+    function shareArticle(articleId) {
+        if (navigator.share) {
+            navigator.share({
+                title: 'CIREC Article',
+                url: window.location.origin + '/article/' + articleId
+            });
+        } else {
+            // Fallback for browsers without Web Share API
+            const url = window.location.origin + '/article/' + articleId;
+            navigator.clipboard.writeText(url).then(() => {
+                showNotification('Article link copied to clipboard', 'success');
+            }).catch(() => {
+                showNotification('Unable to copy link', 'error');
+            });
+        }
+    }
+
+    function bookmarkArticle(articleId) {
+        // This would typically make an API call to save the bookmark
+        fetch('/api/bookmark', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ article_id: articleId })
+        })
+            .then(response => response.json())
+            .then(data => {
+                showNotification('Article bookmarked', 'success');
+            })
+            .catch(error => {
+                showNotification('Unable to bookmark article', 'error');
+            });
+    }
+
+    function clearSearch() {
+        document.querySelector('.search-input').value = '';
+        window.location.href = window.location.pathname;
+    }
+</script>
+{% endblock %}
